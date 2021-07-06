@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { Ingredient } from '../shared/ingredient.model';
 import { ShoppingListService } from '../shopping-list/shopping-list.service';
 import { Recipe } from './recipe.model';
@@ -7,13 +8,15 @@ import { Recipe } from './recipe.model';
   providedIn: 'root'
 })
 export class RecipeService {
-  
+
+  recipesChanged = new Subject<Recipe[]>();
+
   private recipes: Recipe[] = [
     new Recipe("A test recipe", "Test description...",
       "https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2018/12/Shakshuka-19.jpg",
       [
-        new Ingredient('Meat',1),
-        new Ingredient('French fries',20)
+        new Ingredient('Meat', 1),
+        new Ingredient('French fries', 20)
       ]),
     new Recipe("Another test recipe", "Test descriptiossssssssssn...",
       "https://images.food52.com/S_S9Xq9IsgoLENFJkfKvkvwSChg=/1200x1200/a4ad34a1-b43b-42d6-8a73-b3d5f19d11f3--2020-0218_asparagus-lemon-pepper-marinade-genius_3x2_ty-mecham.jpg",
@@ -27,18 +30,33 @@ export class RecipeService {
         new Ingredient('Apples', 1)
       ]),
   ];
-  
+
   constructor(private slService: ShoppingListService) { }
 
-  getRecipes(){
+  getRecipes() {
     return this.recipes.slice();
   }
 
-  getRecipe(id: number){
+  getRecipe(id: number) {
     return this.recipes[id];
   }
 
-  addIngredientsToShoppingList(ingredients: Ingredient[]){
+  addIngredientsToShoppingList(ingredients: Ingredient[]) {
     this.slService.addIngredients(ingredients);
+  }
+
+  addRecipe(recipe: Recipe) {
+    this.recipes.push(recipe);
+    this.recipesChanged.next(this.recipes.slice())
+  }
+
+  updateRecipe(index: number, newRecipe: Recipe) {
+    this.recipes[index] = newRecipe;
+    this.recipesChanged.next(this.recipes.slice())
+  }
+
+  deleteRecipe(index: number) {
+    this.recipes.splice(index, 1);
+    this.recipesChanged.next(this.recipes.slice());
   }
 }
